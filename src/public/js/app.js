@@ -30,7 +30,7 @@ function handleSubmit(event) {
     event.preventDefault();
     const input = messageForm.querySelector("input");
     socket.send(makeMessage("new_message", input.value));
-    input.value ="";
+    const li = document.createElement("li");
 }
 
 function handleNickSubmit(event) {

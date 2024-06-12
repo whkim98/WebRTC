@@ -33,8 +33,8 @@ wss.on("connection", (socket) => {
             case "nickname":
                 socket["nickname"] = message.payload;
         }
-
     });
 });
 
 server.listen(3000, handleListen);
+
