@@ -49,12 +49,18 @@ const socket = io();
 const welcome = document.getElementById('welcome');
 const form = welcome.querySelector('form');
 
+
+function backendDone(msg){
+    console.log(`The Backend says: ` + msg);
+}
+
 function handleRoomSubmit(event) {
     event.preventDefault();
     const input = form.querySelector("input");
-    socket.emit("enter_room", {payload: input.value}, () => {
-        console.log("server is done!");
-    });
+    //WebSocket에서는 오직 String만 전송할 수 있었지만 socket.io는 내가 원하는 무엇이든 전송 가능
+    //단 socket.emit과 서버의 socket.on의 객체 이름은 같아야 함
+    //끝날 때 실행되는 function을 보내고 싶다면 socket.emit의 마지막에 적어줘야 함
+    socket.emit("enter_room", input.value, backendDone );
     input.value="";
 }
 
