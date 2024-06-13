@@ -19,8 +19,13 @@ const httpServer = http.createServer(app); //http서버가 필요한 이유: vie
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-    console.log(socket);
-})
+    socket.on("enter_room", (msg, done) => {
+        console.log(msg);
+        setTimeout(() => {
+            done();
+        }, 10000);
+    });
+});
 
 //WebSocket만을 이용한 코드 주석 처리
 // const wss = new WebSocket.Server({ server });
