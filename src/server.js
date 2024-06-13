@@ -19,21 +19,24 @@ const httpServer = http.createServer(app); //http서버가 필요한 이유: vie
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
+    socket["nickname"] = "Anon";
     socket.onAny((event) => {
        console.log(`socket event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome");
+        socket.to(roomName).emit("welcome", socket.nickname);
     });
     socket.on("disconnecting", () => {
-       socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+       socket.rooms.forEach((room) =>
+           socket.to(room).emit("bye", socket.nickname));
     });
     socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", msg);
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();
     });
+    socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
 });
 
 //WebSocket만을 이용한 코드 주석 처리
