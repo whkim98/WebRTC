@@ -1,8 +1,9 @@
 //내부 클래스
 import http from 'http';
-import WebSocket from "ws";
+// import WebSocket from "ws";
 import express from "express";
-import SocketIO from "socket.io";
+import { Server } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 
 const app = express();
 
@@ -16,7 +17,16 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 
 //http서버와 웹소켓 서버를 둘 다 같은 포트에서 사용하기 위함
 const httpServer = http.createServer(app); //http서버가 필요한 이유: views, static files, home, redirection을 하기 위함
-const wsServer = SocketIO(httpServer);
+const wsServer = new Server(httpServer, {
+    cors: {
+        origin: ["https://admin.socket.io"],
+        credentials: true
+    }
+});
+
+instrument(wsServer, {
+    auth: false,
+});
 
 function publicRooms(){
     const {
@@ -86,6 +96,6 @@ wsServer.on("connection", (socket) => {
 //     });
 // });
 
-httpServer.listen(3000, '192.168.0.18', handleListen);
+httpServer.listen(3000, handleListen);
 
 //SOCKET.IO는 WebSocket의 부가기능이 아닌 별도의 framework임
