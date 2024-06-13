@@ -33,20 +33,29 @@ function publicRooms(){
     return publicRooms;
 }
 
+function countRoom(roomName){
+    return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+
 wsServer.on("connection", (socket) => {
     socket["nickname"] = "Anon";
     socket.onAny((event) => {
         console.log(wsServer.sockets.adapter);
-       console.log(`socket event: ${event}`);
+        console.log(`socket event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome", socket.nickname);
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+        wsServer.sockets.emit("room_change", publicRooms());
     });
     socket.on("disconnecting", () => {
-       socket.rooms.forEach((room) =>
-           socket.to(room).emit("bye", socket.nickname));
+        socket.rooms.forEach((room) =>
+            socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
+        );
+    });
+    socket.on("disconnect", () => {
+        wsServer.sockets.emit("room_change", publicRooms());
     });
     socket.on("new_message", (msg, room, done) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
@@ -77,6 +86,6 @@ wsServer.on("connection", (socket) => {
 //     });
 // });
 
-httpServer.listen(3000, handleListen);
+httpServer.listen(3000, '192.168.0.18', handleListen);
 
 //SOCKET.IO는 WebSocket의 부가기능이 아닌 별도의 framework임
