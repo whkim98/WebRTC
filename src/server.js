@@ -18,9 +18,25 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const httpServer = http.createServer(app); //http서버가 필요한 이유: views, static files, home, redirection을 하기 위함
 const wsServer = SocketIO(httpServer);
 
+function publicRooms(){
+    const {
+        sockets: {
+            adapter: {sids, rooms},
+        },
+    } = wsServer;
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if(sids.get(key) === undefined){
+            publicRooms.push(key);
+        }
+    })
+    return publicRooms;
+}
+
 wsServer.on("connection", (socket) => {
     socket["nickname"] = "Anon";
     socket.onAny((event) => {
+        console.log(wsServer.sockets.adapter);
        console.log(`socket event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
